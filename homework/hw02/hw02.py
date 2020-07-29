@@ -37,6 +37,11 @@ def product(n, term):
     True
     """
     "*** YOUR CODE HERE ***"
+    ret = 1
+    while n > 0:
+        ret = ret * term(n)
+        n-=1
+    return ret
 
 def factorial(n):
     """Return n factorial for n >= 0 by calling product.
@@ -50,6 +55,7 @@ def factorial(n):
     True
     """
     "*** YOUR CODE HERE ***"
+    return product(n, identity)
 
 def accumulate(combiner, base, n, term):
     """Return the result of combining the first n terms in a sequence and base.
@@ -70,6 +76,11 @@ def accumulate(combiner, base, n, term):
     19
     """
     "*** YOUR CODE HERE ***"
+    ret = base
+    while n > 0:
+        ret = combiner(ret, term(n))
+        n -= 1
+    return ret
 
 def summation_using_accumulate(n, term):
     """Returns the sum of term(1) + ... + term(n). The implementation
@@ -85,6 +96,7 @@ def summation_using_accumulate(n, term):
     True
     """
     "*** YOUR CODE HERE ***"
+    return accumulate(add, 0, n, term)
 
 def product_using_accumulate(n, term):
     """An implementation of product using accumulate.
@@ -99,6 +111,7 @@ def product_using_accumulate(n, term):
     True
     """
     "*** YOUR CODE HERE ***"
+    return accumulate(mul, 1, n, term)
 
 def compose1(f, g):
     """Return a function h, such that h(x) = f(g(x))."""
@@ -118,10 +131,18 @@ def make_repeater(f, n):
     625
     >>> make_repeater(square, 4)(5) # square(square(square(square(5))))
     152587890625
-    >>> make_repeater(square, 0)(5) # Yes, it makes sense to apply the function zero times! 
+    >>> make_repeater(square, 0)(5) # Yes, it makes sense to apply the function zero times!
     5
     """
     "*** YOUR CODE HERE ***"
+    def repeater(x):
+        ret = x
+        i = n
+        while i > 0:
+            ret = f(ret)
+            i -= 1
+        return ret
+    return repeater
 
 def num_sevens(n):
     """Returns the number of times 7 appears as a digit of n.
@@ -144,6 +165,16 @@ def num_sevens(n):
     True
     """
     "*** YOUR CODE HERE ***"
+    if n < 10:
+        if n == 7:
+            return 1
+        else:
+            return 0
+    else:
+        if n % 10 == 7:
+            return 1 + num_sevens(n // 10)
+        else:
+            return num_sevens(n // 10)
 
 def pingpong(n):
     """Return the nth element of the ping-pong sequence.
@@ -177,6 +208,23 @@ def pingpong(n):
     True
     """
     "*** YOUR CODE HERE ***"
+    # if n == 1 or n == 2:
+    #     return n
+    # prev = pingpong(n-1)
+    # direction = prev - pingpong(n-2)
+    # if (n-1) % 7 == 0 or num_sevens(n-1) > 0:
+    #     direction = -direction
+    # return prev + direction
+
+    ret = 1
+    i = 2
+    direction = 1
+    while i <= n:
+        ret += direction
+        if i % 7 == 0 or num_sevens(i) > 0:
+            direction = -direction
+        i += 1
+    return ret
 
 def count_change(amount):
     """Return the number of ways to make change for amount.
@@ -194,6 +242,20 @@ def count_change(amount):
     True
     """
     "*** YOUR CODE HERE ***"
+    def count_change_max(amount, maxCnt):
+        if amount < 0:
+            return 0
+        elif amount == 0:
+            return 1
+        elif maxCnt == 0:
+            return 0
+        elif maxCnt == 1:
+            return 1
+        elif maxCnt & maxCnt-1 != 0:
+            return count_change_max(amount, maxCnt - 1)
+        else:
+            return count_change_max(amount - maxCnt, maxCnt) + count_change_max(amount, maxCnt // 2)
+    return count_change_max(amount, amount)
 
 
 
@@ -234,6 +296,13 @@ def move_stack(n, start, end):
     """
     assert 1 <= start <= 3 and 1 <= end <= 3 and start != end, "Bad start/end"
     "*** YOUR CODE HERE ***"
+    if n == 1:
+        print_move(start, end)
+    else:
+        other_pole = 6 - start - end
+        move_stack(n - 1, start, other_pole)
+        print_move(start, end)
+        move_stack(n - 1, other_pole, end)
 
 from operator import sub, mul
 
@@ -246,4 +315,4 @@ def make_anonymous_factorial():
     >>> check(HW_SOURCE_FILE, 'make_anonymous_factorial', ['Assign', 'AugAssign', 'FunctionDef', 'Recursion'])
     True
     """
-    return 'YOUR_EXPRESSION_HERE'
+    return lambda x: 1 if x == 1 else (lambda y: x * y)(x - 1)
